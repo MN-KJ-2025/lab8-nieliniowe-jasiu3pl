@@ -103,7 +103,25 @@ def bisection(
             - Liczba wykonanych iteracji.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and callable(f)):
+        return None
+    
+    if f(a) * f(b) >= 0:
+        return None
+    
+    midpoint = a
+    for i in range(max_iter):
+        midpoint = (a+b)/2
+        f_mid = f(midpoint)
+        
+        if abs(f_mid) < epsilon or abs((b-a)/(b+a)) < epsilon:
+            return midpoint, i+1
+        elif f(a) * f_mid < 0:
+            b = midpoint
+        else:
+            a = midpoint
+            
+    return midpoint, max_iter
 
 
 def secant(
@@ -130,7 +148,31 @@ def secant(
             - Liczba wykonanych iteracji.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (isinstance(a, (int, float)) and isinstance(b, (int, float)) and callable(f)):
+        return None
+    
+    fa = f(a)
+    fb = f(b)
+
+    if fa * fb >= 0:
+        return None
+
+    for i in range(1, max_iters + 1):
+        if abs(fa - fb) < 1e-16:
+            None
+        
+        x = (fa * b - fb * a) / (fa - fb)
+        fx = f(x)
+        if fx == 0 or abs(f(x)) <= epsilon:
+            return (x, i)
+        
+        if fa * fx < 0:
+            b = x
+            fb = fx
+        else:
+            a = x
+            fa = fx
+    return (float(x), max_iters)
 
 
 def difference_quotient(
@@ -150,7 +192,9 @@ def difference_quotient(
         (float): Wartość ilorazu różnicowego.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not callable(f):
+        return None 
+    return (f(x+h)-f(x))/h
 
 
 def newton(
@@ -182,4 +226,31 @@ def newton(
             - Liczba wykonanych iteracji.
         Jeżeli dane wejściowe są niepoprawne funkcja zwraca `None`.
     """
-    pass
+    if not (callable(f) and callable(df) and callable(ddf)):
+        return None
+    
+    if f(a) * f(b) >= 0:
+        return None
+    
+    x = a
+    if f(a) * ddf(a) > 0:
+        x = a
+    elif f(b) * ddf(b) > 0:
+        x = b
+    else:
+        x = (a + b) / 2
+    for i in range(max_iter):
+        y = f(x)
+        dy = df(x)
+        
+        if abs(dy) < 1e-16:
+            return None
+        
+        x_next = x - y / dy
+
+        if abs(f(x_next)) < epsilon or abs(x_next - x) < epsilon:
+            return x_next, i + 1
+        
+        x = x_next
+        
+    return x, max_iter
